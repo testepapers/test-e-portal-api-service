@@ -1,9 +1,9 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: test-e-portal-api-service-staging
+  name: test-e-portal-api-service-test
   labels:
-    environment: staging
+    environment: test
 spec:
   template:
     metadata:
@@ -15,9 +15,12 @@ spec:
       containers:
         - image: asia-south2-docker.pkg.dev/test-e-portal-api-service/test-e-portal-images/test-e-portal-api-service:TAG_PLACEHOLDER
           ports:
-            - containerPort: 8080
+            - name: http1
+              containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
+              value: test
+            - name: ENV
               value: test
           resources:
             limits:

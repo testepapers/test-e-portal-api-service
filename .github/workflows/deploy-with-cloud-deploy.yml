@@ -107,11 +107,11 @@ jobs:
             --delivery-pipeline=${{ env.PIPELINE_NAME }} \
             --region=${{ env.REGION }}
 
-      - name: Promote to Test
+      - name: Promote to Test Environment
         run: |
           RELEASE_NAME="${{ steps.create-release.outputs.release_name }}"
           
-          echo "Promoting $RELEASE_NAME to test..."
+          echo "Promoting $RELEASE_NAME to test environment..."
           
           gcloud deploy releases promote \
             --delivery-pipeline=${{ env.PIPELINE_NAME }} \
@@ -120,5 +120,5 @@ jobs:
             --to-target=test \
             --quiet
           
-          echo "✅ Promoted to test"
+          echo "✅ Promoted to test environment"
           echo "View deployment: https://console.cloud.google.com/deploy/delivery-pipelines/${{ env.REGION }}/${{ env.PIPELINE_NAME }}?project=${{ env.PROJECT_ID }}"

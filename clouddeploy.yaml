@@ -6,12 +6,12 @@ description: Deployment pipeline for Test E-Portal API
 serialPipeline:
   stages:
     - targetId: test
-      profiles: []
+      profiles: [test]  # ⭐ Changed to test
       strategy:
         standard:
           verify: false
     - targetId: prod
-      profiles: []
+      profiles: [prod]  # ⭐ Changed to prod
       strategy:
         standard:
           verify: false
@@ -28,7 +28,7 @@ apiVersion: deploy.cloud.google.com/v1
 kind: Target
 metadata:
   name: prod
-description: Prod environment
-requireApproval: true
+description: Production environment
+requireApproval: true  # ⭐ Manual approval required
 run:
   location: projects/test-e-portal-api-service/locations/asia-south2
