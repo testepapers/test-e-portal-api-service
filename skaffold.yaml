@@ -1,0 +1,13 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: test-e-portal-api-service
+profiles:
+  - name: test
+    manifests:
+      rawYaml:
+        - deploy/test.yaml
+  - name: prod
+    manifests:
+      rawYaml:
+        - deploy/prod.yaml

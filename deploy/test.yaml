@@ -1,0 +1,25 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: test-e-portal-api-service-staging
+  labels:
+    environment: staging
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '1'
+        autoscaling.knative.dev/minScale: '0'
+    spec:
+      containerConcurrency: 80
+      containers:
+        - image: asia-south2-docker.pkg.dev/test-e-portal-api-service/test-e-portal-images/test-e-portal-api-service:TAG_PLACEHOLDER
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: test
+          resources:
+            limits:
+              cpu: '1'
+              memory: 256Mi

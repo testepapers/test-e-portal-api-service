@@ -1,0 +1,98 @@
+name: Build and Deploy via Cloud Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: test-e-portal-api-service
+  SERVICE_NAME: test-e-portal-api-service
+  REGION: asia-south2
+  REGISTRY: asia-south2-docker.pkg.dev
+  REPOSITORY: test-e-portal-images
+  PIPELINE_NAME: test-e-portal-pipeline
+
+jobs:
+  build-and-release:
+    name: Build Image and Create Cloud Deploy Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Build and Push Docker Image
+        id: build-image
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          IMAGE="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE_NAME }}:${SHORT_SHA}"
+          
+          docker build --platform linux/amd64 -t $IMAGE .
+          docker push $IMAGE
+          
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Update manifest with image tag
+        run: |
+          SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
+          sed -i "s|TAG_PLACEHOLDER|${SHORT_SHA}|g" deploy/test.yaml
+          sed -i "s|TAG_PLACEHOLDER|${SHORT_SHA}|g" deploy/prod.yaml
+
+      - name: Create Cloud Deploy Release
+        run: |
+          SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
+          RELEASE_NAME="release-${SHORT_SHA}-$(date +%s)"
+          
+          gcloud deploy releases create $RELEASE_NAME \
+            --delivery-pipeline=${{ env.PIPELINE_NAME }} \
+            --region=${{ env.REGION }} \
+            --source=. \
+            --images=${{ env.SERVICE_NAME }}=${{ steps.build-image.outputs.image }}
+          
+          echo "Cloud Deploy release created: $RELEASE_NAME"
+          echo "View in console: https://console.cloud.google.com/deploy/delivery-pipelines/${{ env.REGION }}/${{ env.PIPELINE_NAME }}?project=${{ env.PROJECT_ID }}"
+
+      - name: Auto-promote to Test
+        run: |
+          SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
+          RELEASE_NAME="release-${SHORT_SHA}-$(date +%s)"
+          
+          # Wait a bit for release to be ready
+          sleep 10
+          
+          # Promote to test automatically
+          gcloud deploy releases promote \
+            --delivery-pipeline=${{ env.PIPELINE_NAME }} \
+            --region=${{ env.REGION }} \
+            --release=$RELEASE_NAME \
+            --to-target=test \
+            --quiet
+          
+          echo "🚀 Deployed to test automatically"
