@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-and-release:
-    name: Build Image and Create Cloud Deploy Release
+    name: Build Image and Deploy via Cloud Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -58,17 +58,30 @@ jobs:
           
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "✅ Image built and pushed: $IMAGE"
 
-      - name: Update manifest with image tag
+      - name: Update Deployment Manifests
+        id: update-manifests
         run: |
           SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
+          
+          # Update manifests with image tag
           sed -i "s|TAG_PLACEHOLDER|${SHORT_SHA}|g" deploy/test.yaml
           sed -i "s|TAG_PLACEHOLDER|${SHORT_SHA}|g" deploy/prod.yaml
+          
+          # Show what was updated
+          echo "Updated test.yaml:"
+          grep "image:" deploy/test.yaml
+          echo "Updated prod.yaml:"
+          grep "image:" deploy/prod.yaml
 
       - name: Create Cloud Deploy Release
+        id: create-release
         run: |
           SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
-          RELEASE_NAME="release-${SHORT_SHA}-$(date +%s)"
+          RELEASE_NAME="release-${SHORT_SHA}"
+          
+          echo "Creating Cloud Deploy release: $RELEASE_NAME"
           
           gcloud deploy releases create $RELEASE_NAME \
             --delivery-pipeline=${{ env.PIPELINE_NAME }} \
@@ -76,18 +89,30 @@ jobs:
             --source=. \
             --images=${{ env.SERVICE_NAME }}=${{ steps.build-image.outputs.image }}
           
-          echo "Cloud Deploy release created: $RELEASE_NAME"
-          echo "View in console: https://console.cloud.google.com/deploy/delivery-pipelines/${{ env.REGION }}/${{ env.PIPELINE_NAME }}?project=${{ env.PROJECT_ID }}"
+          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          echo "✅ Cloud Deploy release created: $RELEASE_NAME"
 
-      - name: Auto-promote to Test
+      - name: Wait for Release to be Ready
         run: |
-          SHORT_SHA=${{ steps.build-image.outputs.short_sha }}
-          RELEASE_NAME="release-${SHORT_SHA}-$(date +%s)"
+          echo "Waiting 15 seconds for release to be fully created..."
+          sleep 15
+
+      - name: Verify Release Exists
+        run: |
+          RELEASE_NAME="${{ steps.create-release.outputs.release_name }}"
           
-          # Wait a bit for release to be ready
-          sleep 10
+          echo "Verifying release: $RELEASE_NAME"
           
-          # Promote to test automatically
+          gcloud deploy releases describe $RELEASE_NAME \
+            --delivery-pipeline=${{ env.PIPELINE_NAME }} \
+            --region=${{ env.REGION }}
+
+      - name: Promote to Test
+        run: |
+          RELEASE_NAME="${{ steps.create-release.outputs.release_name }}"
+          
+          echo "Promoting $RELEASE_NAME to test..."
+          
           gcloud deploy releases promote \
             --delivery-pipeline=${{ env.PIPELINE_NAME }} \
             --region=${{ env.REGION }} \
@@ -95,4 +120,5 @@ jobs:
             --to-target=test \
             --quiet
           
-          echo "🚀 Deployed to test automatically"
+          echo "✅ Promoted to test"
+          echo "View deployment: https://console.cloud.google.com/deploy/delivery-pipelines/${{ env.REGION }}/${{ env.PIPELINE_NAME }}?project=${{ env.PROJECT_ID }}"
