@@ -5,11 +5,15 @@ metadata:
 
 profiles:
   - name: test
+    deploy:
+      cloudrun: {}
     manifests:
       rawYaml:
         - deploy/test.yaml
 
   - name: prod
+    deploy:
+      cloudrun: {}
     manifests:
       rawYaml:
         - deploy/prod.yaml
