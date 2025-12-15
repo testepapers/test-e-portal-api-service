@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter
 class InfoController(
     private val environment: Environment
 ) {
-    
     @GetMapping("/info")
     fun getInfo(): Map<String, String> {
         val activeProfile = environment.activeProfiles.firstOrNull() ?: "default"
