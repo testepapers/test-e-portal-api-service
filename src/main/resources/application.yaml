@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: test-e-portal-api-service
+  profiles:
+    active: dev
