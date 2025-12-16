@@ -44,4 +44,4 @@ spec:
           resources:
             limits:
               cpu: '1'      # More resources for prod
-              memory: 256Mi
+              memory: 1Gi
