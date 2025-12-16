@@ -11,12 +11,11 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/maxScale: '1'
-        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '1'  # Adjust as needed
+        autoscaling.knative.dev/minScale: '0'  # Keep at least 1 for prod
         run.googleapis.com/cloudsql-instances: test-e-portal-api-service:asia-south2:test-e-portal-db-prod
-
     spec:
-      containerConcurrency: 100
+      containerConcurrency: 80
       containers:
         - image: asia-south2-docker.pkg.dev/test-e-portal-api-service/test-e-portal-images/test-e-portal-api-service:TAG_PLACEHOLDER
           ports:
@@ -27,12 +26,22 @@ spec:
               value: prod
             - name: ENV
               value: prod
-            - name: DATABASE_URL
+            - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
                   name: prod-db-url
                   key: latest
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: prod-db-username
+                  key: latest
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prod-db-password
+                  key: latest
           resources:
             limits:
-              cpu: '1'
+              cpu: '1'      # More resources for prod
               memory: 256Mi
