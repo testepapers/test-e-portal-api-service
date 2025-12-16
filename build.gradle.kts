@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.3"
     kotlin("jvm") version "1.9.24"
     kotlin("plugin.spring") version "1.9.24"
+    kotlin("plugin.jpa") version "1.9.24"
 }
 
 group = "com.example"
@@ -31,6 +32,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Existing dependencies
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.postgresql:postgresql")
+    implementation("com.google.cloud.sql:postgres-socket-factory:1.15.0")
+
+
+    // ADD Liquibase
+    implementation("org.liquibase:liquibase-core:4.25.1")
+
+    // For JSON support in Liquibase
+    implementation("org.yaml:snakeyaml:2.2")
 }
 
 tasks.withType<KotlinCompile> {

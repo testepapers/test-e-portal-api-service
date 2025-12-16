@@ -4,12 +4,17 @@ metadata:
   name: test-e-portal-api-service-prod
   labels:
     environment: prod
+  annotations:
+    run.googleapis.com/cloudsql-instances: test-e-portal-api-service:asia-south2:test-e-portal-db-prod
+
 spec:
   template:
     metadata:
       annotations:
         autoscaling.knative.dev/maxScale: '1'
         autoscaling.knative.dev/minScale: '0'
+        run.googleapis.com/cloudsql-instances: test-e-portal-api-service:asia-south2:test-e-portal-db-prod
+
     spec:
       containerConcurrency: 100
       containers:
@@ -22,6 +27,11 @@ spec:
               value: prod
             - name: ENV
               value: prod
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: prod-db-url
+                  key: latest
           resources:
             limits:
               cpu: '1'

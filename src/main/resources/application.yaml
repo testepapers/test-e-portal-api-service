@@ -3,3 +3,20 @@ spring:
     name: test-e-portal-api-service
   profiles:
     active: dev
+  datasource:
+    # ⭐ Use environment variable with fallback
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/localdb}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.json
+    default-schema: public
