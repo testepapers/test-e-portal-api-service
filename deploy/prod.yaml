@@ -43,5 +43,5 @@ spec:
                   key: latest
           resources:
             limits:
-              cpu: '1'      # More resources for prod
+              cpu: '1'
               memory: 1Gi
