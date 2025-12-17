@@ -167,10 +167,8 @@
             }
           },
           {
-            "addCheckConstraint": {
-              "tableName": "question",
-              "constraintName": "question_difficulty_check",
-              "checkCondition": "difficulty IN ('easy','medium','hard')"
+            "sql": {
+              "sql": "ALTER TABLE question ADD CONSTRAINT question_difficulty_check CHECK (difficulty IN ('easy','medium','hard'))"
             }
           },
           {
@@ -264,6 +262,11 @@
           {
             "sql": {
               "sql": "DROP FUNCTION IF EXISTS touch_updated_at()"
+            }
+          },
+          {
+            "sql": {
+              "sql": "ALTER TABLE question DROP CONSTRAINT IF EXISTS question_difficulty_check"
             }
           },
           {
