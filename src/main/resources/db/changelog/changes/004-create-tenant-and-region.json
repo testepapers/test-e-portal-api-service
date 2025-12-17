@@ -1,0 +1,109 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "004-create-tenant-and-region",
+        "author": "migration",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "region",
+              "columns": [
+                {
+                  "column": {
+                    "name": "code",
+                    "type": "TEXT",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_region"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable": {
+              "tableName": "tenant",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGSERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_tenant"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "code",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false,
+                      "unique": true,
+                      "uniqueConstraintName": "uk_tenant_code"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "home_region",
+                    "type": "TEXT",
+                    "constraints": {
+                      "foreignKeyName": "fk_tenant_region",
+                      "references": "region(code)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "meta",
+                    "type": "JSONB",
+                    "defaultValueComputed": "'{}'::jsonb",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rollback": [
+          {
+            "dropTable": {
+              "tableName": "tenant",
+              "cascadeConstraints": true
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "region",
+              "cascadeConstraints": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

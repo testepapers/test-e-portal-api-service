@@ -1,0 +1,279 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "005-create-question-table",
+        "author": "migration",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "question",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGSERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_question"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "board_id",
+                    "type": "INT",
+                    "constraints": {
+                      "foreignKeyName": "fk_question_board",
+                      "references": "board(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "grade_id",
+                    "type": "INT",
+                    "constraints": {
+                      "foreignKeyName": "fk_question_grade",
+                      "references": "grade(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "subject_id",
+                    "type": "INT",
+                    "constraints": {
+                      "foreignKeyName": "fk_question_subject",
+                      "references": "subject(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "chapter_id",
+                    "type": "INT",
+                    "constraints": {
+                      "foreignKeyName": "fk_question_chapter",
+                      "references": "chapter(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "type_id",
+                    "type": "INT",
+                    "constraints": {
+                      "nullable": false,
+                      "foreignKeyName": "fk_question_type",
+                      "references": "question_type(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "tenant_id",
+                    "type": "BIGINT",
+                    "defaultValueNumeric": "1",
+                    "constraints": {
+                      "nullable": false,
+                      "foreignKeyName": "fk_question_tenant",
+                      "references": "tenant(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "difficulty",
+                    "type": "TEXT",
+                    "defaultValue": "medium"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "tags",
+                    "type": "TEXT[]",
+                    "defaultValueComputed": "'{}'",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "spec",
+                    "type": "JSONB",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "solution",
+                    "type": "JSONB",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "source",
+                    "type": "JSONB",
+                    "defaultValueComputed": "'{}'::jsonb",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "seed_key",
+                    "type": "TEXT"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "created_at",
+                    "type": "TIMESTAMPTZ",
+                    "defaultValueComputed": "now()",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "updated_at",
+                    "type": "TIMESTAMPTZ",
+                    "defaultValueComputed": "now()",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "marks",
+                    "type": "NUMERIC",
+                    "defaultValueNumeric": "1",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addCheckConstraint": {
+              "tableName": "question",
+              "constraintName": "question_difficulty_check",
+              "checkCondition": "difficulty IN ('easy','medium','hard')"
+            }
+          },
+          {
+            "createIndex": {
+              "indexName": "idx_question_type_difficulty",
+              "tableName": "question",
+              "columns": [
+                {
+                  "column": {
+                    "name": "type_id"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "difficulty"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createIndex": {
+              "indexName": "idx_question_fk_combo",
+              "tableName": "question",
+              "columns": [
+                {
+                  "column": {
+                    "name": "board_id"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "grade_id"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "subject_id"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "chapter_id"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "type_id"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "sql": {
+              "sql": "CREATE INDEX IF NOT EXISTS question_spec_gin_idx ON question USING GIN (spec jsonb_path_ops)"
+            }
+          },
+          {
+            "sql": {
+              "sql": "CREATE INDEX IF NOT EXISTS question_solution_gin_idx ON question USING GIN (solution jsonb_path_ops)"
+            }
+          },
+          {
+            "sql": {
+              "sql": "CREATE INDEX IF NOT EXISTS question_tags_idx ON question USING GIN (tags)"
+            }
+          },
+          {
+            "sql": {
+              "sql": "CREATE UNIQUE INDEX IF NOT EXISTS question_seed_key_unique_idx ON question(seed_key) WHERE seed_key IS NOT NULL"
+            }
+          },
+          {
+            "sql": {
+              "sql": "CREATE OR REPLACE FUNCTION touch_updated_at() RETURNS trigger AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$ LANGUAGE plpgsql"
+            }
+          },
+          {
+            "sql": {
+              "sql": "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_question_updated_at') THEN CREATE TRIGGER trg_question_updated_at BEFORE UPDATE ON question FOR EACH ROW EXECUTE FUNCTION touch_updated_at(); END IF; END $$;"
+            }
+          }
+        ],
+        "rollback": [
+          {
+            "sql": {
+              "sql": "DROP TRIGGER IF EXISTS trg_question_updated_at ON question"
+            }
+          },
+          {
+            "sql": {
+              "sql": "DROP FUNCTION IF EXISTS touch_updated_at()"
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "question",
+              "cascadeConstraints": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
