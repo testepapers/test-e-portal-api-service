@@ -9,6 +9,9 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_MAX_CONNECTIONS:10}
+      idle-timeout: ${DB_IDLE_TIMEOUT:30000}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -20,3 +23,33 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.json
     default-schema: public
+
+server:
+  port: ${PORT:3001}
+
+logging:
+  level:
+    root: INFO
+    com.testeportal: ${LOG_LEVEL:INFO}
+  pattern:
+    console: "[%d{yyyy-MM-dd HH:mm:ss}] [%level] %msg%n"
+
+app:
+  cors:
+    enabled: ${CORS_ENABLED:true}
+
+  llm:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      model: ${OPENAI_MODEL:gpt-4o-mini}
+      scoring-model: ${OPENAI_SCORING_MODEL:gpt-4o-mini}
+      timeout: ${OPENAI_TIMEOUT:60000}
+    gemini:
+      api-key: ${GOOGLE_API_KEY:}
+      model: ${GEMINI_MODEL:gemini-1.5-flash}
+      scoring-model: ${GEMINI_SCORING_MODEL:gemini-1.5-flash}
+      timeout: ${GEMINI_TIMEOUT:60000}
+
+  validation:
+    subjective:
+      passing-score: ${SUBJECTIVE_PASSING_SCORE:0.5}

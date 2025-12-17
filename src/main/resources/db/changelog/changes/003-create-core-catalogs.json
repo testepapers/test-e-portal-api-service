@@ -1,0 +1,234 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "003-create-core-catalogs",
+        "author": "migration",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "board",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "SERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_board"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "code",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false,
+                      "unique": true,
+                      "uniqueConstraintName": "uk_board_code"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable": {
+              "tableName": "grade",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "SERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_grade"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "label",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false,
+                      "unique": true,
+                      "uniqueConstraintName": "uk_grade_label"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable": {
+              "tableName": "subject",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "SERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_subject"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "name",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false,
+                      "unique": true,
+                      "uniqueConstraintName": "uk_subject_name"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "createTable": {
+              "tableName": "chapter",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "SERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_chapter"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "subject_id",
+                    "type": "INT",
+                    "constraints": {
+                      "nullable": false,
+                      "foreignKeyName": "fk_chapter_subject",
+                      "references": "subject(id)"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "number",
+                    "type": "INT"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "title",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "meta",
+                    "type": "JSONB",
+                    "defaultValueComputed": "'{}'::jsonb",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "addUniqueConstraint": {
+              "tableName": "chapter",
+              "constraintName": "chapter_unique",
+              "columnNames": "subject_id, title"
+            }
+          },
+          {
+            "createTable": {
+              "tableName": "question_type",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "SERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_question_type"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "key",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false,
+                      "unique": true,
+                      "uniqueConstraintName": "uk_question_type_key"
+                    }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "label",
+                    "type": "TEXT",
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "rollback": [
+          {
+            "dropTable": {
+              "tableName": "question_type",
+              "cascadeConstraints": true
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "chapter",
+              "cascadeConstraints": true
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "subject",
+              "cascadeConstraints": true
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "grade",
+              "cascadeConstraints": true
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "board",
+              "cascadeConstraints": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
