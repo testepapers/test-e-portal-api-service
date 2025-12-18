@@ -1,6 +1,5 @@
 package com.testeportal.api.service
 
-import com.testeportal.api.exception.DatabaseException
 import com.testeportal.api.exception.QuestionNotFoundException
 import com.testeportal.api.exception.UnknownQuestionTypeException
 import com.testeportal.api.model.Question
@@ -75,29 +74,29 @@ class ValidationService(
             throw e
         }
     }
-    
+
     private suspend fun fetchQuestion(questionId: Long): Question {
         logger.debug { "Fetching question from database: $questionId" }
-        
-        val question = questionRepository.findByIdWithType(questionId)
-            ?: throw QuestionNotFoundException(questionId)
-        
-        logger.debug { 
-            "Question fetched successfully - questionId: $questionId, typeKey: ${question.typeKey}" 
+
+        val question = questionRepository.findById(questionId)
+            .orElseThrow { IllegalArgumentException("Question not found: $questionId") }
+
+        logger.debug {
+            "Question fetched successfully - questionId: $questionId, typeKey: ${question.questionType?.key}"
         }
-        
+
         return question
     }
     
     private fun normalizeType(question: Question): String {
-        val normalizedType = NormalizeUtil.normalizeQuestionType(question.typeKey)
+        val normalizedType = NormalizeUtil.normalizeQuestionType(question.questionType?.key)
         
         if (!validatorRegistry.isSupported(normalizedType)) {
-            throw UnknownQuestionTypeException(question.typeKey ?: "")
+            throw UnknownQuestionTypeException(question.questionType?.key ?: "")
         }
         
         logger.debug { 
-            "Question type normalized - original: ${question.typeKey}, normalized: $normalizedType" 
+            "Question type normalized - original: ${question.questionType?.key}, normalized: $normalizedType"
         }
         
         return normalizedType

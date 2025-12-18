@@ -2,7 +2,7 @@
   "databaseChangeLog": [
     {
       "changeSet": {
-        "id": "004-create-tenant-and-region",
+        "id": "002-create-tenant-and-region",
         "author": "migration",
         "changes": [
           {

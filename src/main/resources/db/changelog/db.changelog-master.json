@@ -1,29 +1,9 @@
 {
   "databaseChangeLog": [
-    {
-      "include": {
-        "file": "db/changelog/changes/001-create-users-table.json"
-      }
-    },
-    {
-      "include": {
-        "file": "db/changelog/changes/002-add-indexes.json"
-      }
-    },
-    {
-      "include": {
-        "file": "db/changelog/changes/003-create-core-catalogs.json"
-      }
-    },
-    {
-      "include": {
-        "file": "db/changelog/changes/004-create-tenant-and-region.json"
-      }
-    },
-    {
-      "include": {
-        "file": "db/changelog/changes/005-create-question-table.json"
-      }
-    }
+    { "include": { "file": "db/changelog/changes/001-create-core-catalogs.json" } },
+    { "include": { "file": "db/changelog/changes/002-create-tenant-and-region.json" } },
+    { "include": { "file": "db/changelog/changes/003-create-questions-table.json" } },
+    { "include": { "file": "db/changelog/changes/004-create-question-indexes.json" } },
+    { "include": { "file": "db/changelog/changes/005-create-question-triggers.json" } }
   ]
 }
