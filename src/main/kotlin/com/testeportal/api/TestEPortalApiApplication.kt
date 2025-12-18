@@ -9,4 +9,3 @@ class TestEPortalApiApplication
 fun main(args: Array<String>) {
     runApplication<TestEPortalApiApplication>(*args)
 }
-
