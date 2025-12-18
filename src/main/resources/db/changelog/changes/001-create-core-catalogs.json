@@ -2,7 +2,7 @@
   "databaseChangeLog": [
     {
       "changeSet": {
-        "id": "003-create-core-catalogs",
+        "id": "001-create-core-catalogs",
         "author": "migration",
         "changes": [
           {
@@ -160,15 +160,15 @@
           },
           {
             "createTable": {
-              "tableName": "question_type",
+              "tableName": "questions_type",
               "columns": [
                 {
                   "column": {
                     "name": "id",
-                    "type": "SERIAL",
+                    "type": "BIGSERIAL",
                     "constraints": {
                       "primaryKey": true,
-                      "primaryKeyName": "pk_question_type"
+                      "primaryKeyName": "pk_questions_type"
                     }
                   }
                 },
@@ -179,7 +179,7 @@
                     "constraints": {
                       "nullable": false,
                       "unique": true,
-                      "uniqueConstraintName": "uk_question_type_key"
+                      "uniqueConstraintName": "uk_questions_type_key"
                     }
                   }
                 },
@@ -199,7 +199,7 @@
         "rollback": [
           {
             "dropTable": {
-              "tableName": "question_type",
+              "tableName": "questions_type",
               "cascadeConstraints": true
             }
           },

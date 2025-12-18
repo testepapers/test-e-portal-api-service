@@ -2,6 +2,7 @@ package com.testeportal.api.validator
 
 import com.testeportal.api.util.NormalizeUtil
 import org.springframework.stereotype.Component
+import jakarta.annotation.PostConstruct
 
 /**
  * Validator Registry
@@ -32,6 +33,13 @@ class ValidatorRegistry(
         "subjective" to subjectiveValidator,
         "long_answer" to subjectiveValidator
     )
+    
+    @PostConstruct
+    fun initialize() {
+        // Set self reference in CaseStudyValidator to enable nested case study validation
+        // This breaks the circular dependency by doing it after both beans are constructed
+        caseStudyValidator.setSelfReference(caseStudyValidator)
+    }
     
     /**
      * Get validator for question type

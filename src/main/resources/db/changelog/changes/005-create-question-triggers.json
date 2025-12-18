@@ -1,0 +1,30 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "005-create-questions-triggers",
+        "author": "migration",
+        "changes": [
+          {
+            "sql": {
+              "sql": "CREATE OR REPLACE FUNCTION touch_updated_at() RETURNS trigger AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$ LANGUAGE plpgsql",
+              "splitStatements": false,
+              "stripComments": false
+            }
+          },
+          {
+            "sql": {
+              "sql": "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_questions_updated_at') THEN CREATE TRIGGER trg_questions_updated_at BEFORE UPDATE ON questions FOR EACH ROW EXECUTE FUNCTION touch_updated_at(); END IF; END $$",
+              "splitStatements": false,
+              "stripComments": false
+            }
+          }
+        ],
+        "rollback": [
+          { "sql": { "sql": "DROP TRIGGER IF EXISTS trg_questions_updated_at ON questions" } },
+          { "sql": { "sql": "DROP FUNCTION IF EXISTS touch_updated_at()" } }
+        ]
+      }
+    }
+  ]
+}

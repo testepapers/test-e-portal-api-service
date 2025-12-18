@@ -1,0 +1,178 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "003-create-questions-table",
+        "author": "hivats",
+        "changes": [
+          {
+            "createTable": {
+              "tableName": "questions",
+              "columns": [
+                {
+                  "column": {
+                    "name": "id",
+                    "type": "BIGSERIAL",
+                    "constraints": {
+                      "primaryKey": true,
+                      "primaryKeyName": "pk_questions"
+                    }
+                  }
+                },
+                { "column": { "name": "board_id", "type": "INT" } },
+                { "column": { "name": "grade_id", "type": "INT" } },
+                { "column": { "name": "subject_id", "type": "INT" } },
+                { "column": { "name": "chapter_id", "type": "INT" } },
+                {
+                  "column": {
+                    "name": "type_id",
+                    "type": "BIGINT",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "tenant_id",
+                    "type": "BIGINT",
+                    "defaultValueNumeric": 1,
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "difficulty",
+                    "type": "TEXT",
+                    "defaultValue": "medium"
+                  }
+                },
+                {
+                  "column": {
+                    "name": "tags",
+                    "type": "TEXT[]",
+                    "defaultValueComputed": "'{}'",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "spec",
+                    "type": "JSONB",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "solution",
+                    "type": "JSONB",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "source",
+                    "type": "JSONB",
+                    "defaultValueComputed": "'{}'::jsonb",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                { "column": { "name": "seed_key", "type": "TEXT" } },
+                {
+                  "column": {
+                    "name": "created_at",
+                    "type": "TIMESTAMPTZ",
+                    "defaultValueComputed": "now()",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "updated_at",
+                    "type": "TIMESTAMPTZ",
+                    "defaultValueComputed": "now()",
+                    "constraints": { "nullable": false }
+                  }
+                },
+                {
+                  "column": {
+                    "name": "marks",
+                    "type": "NUMERIC",
+                    "defaultValueNumeric": 1,
+                    "constraints": { "nullable": false }
+                  }
+                }
+              ]
+            }
+          },
+
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "board_id",
+            "constraintName": "fk_questions_board",
+            "referencedTableName": "board",
+            "referencedColumnNames": "id",
+            "onDelete": "SET NULL"
+          }},
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "grade_id",
+            "constraintName": "fk_questions_grade",
+            "referencedTableName": "grade",
+            "referencedColumnNames": "id",
+            "onDelete": "SET NULL"
+          }},
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "subject_id",
+            "constraintName": "fk_questions_subject",
+            "referencedTableName": "subject",
+            "referencedColumnNames": "id",
+            "onDelete": "SET NULL"
+          }},
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "chapter_id",
+            "constraintName": "fk_questions_chapter",
+            "referencedTableName": "chapter",
+            "referencedColumnNames": "id",
+            "onDelete": "SET NULL"
+          }},
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "type_id",
+            "constraintName": "fk_questions_type",
+            "referencedTableName": "questions_type",
+            "referencedColumnNames": "id",
+            "onDelete": "RESTRICT"
+          }},
+          { "addForeignKeyConstraint": {
+            "baseTableName": "questions",
+            "baseColumnNames": "tenant_id",
+            "constraintName": "fk_questions_tenant",
+            "referencedTableName": "tenant",
+            "referencedColumnNames": "id",
+            "onDelete": "RESTRICT"
+          }},
+
+          {
+            "sql": {
+              "sql": "ALTER TABLE questions ADD CONSTRAINT questions_difficulty_check CHECK (difficulty IN ('easy','medium','hard'))"
+            }
+          }
+        ],
+        "rollback": [
+          {
+            "sql": {
+              "sql": "ALTER TABLE questions DROP CONSTRAINT IF EXISTS questions_difficulty_check"
+            }
+          },
+          {
+            "dropTable": {
+              "tableName": "questions",
+              "cascadeConstraints": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

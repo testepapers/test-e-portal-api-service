@@ -1,0 +1,47 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "004-create-questions-indexes",
+        "author": "migration",
+        "changes": [
+          {
+            "createIndex": {
+              "indexName": "idx_questions_type_difficulty",
+              "tableName": "questions",
+              "columns": [
+                { "column": { "name": "type_id" } },
+                { "column": { "name": "difficulty" } }
+              ]
+            }
+          },
+          {
+            "createIndex": {
+              "indexName": "idx_questions_fk_combo",
+              "tableName": "questions",
+              "columns": [
+                { "column": { "name": "board_id" } },
+                { "column": { "name": "grade_id" } },
+                { "column": { "name": "subject_id" } },
+                { "column": { "name": "chapter_id" } },
+                { "column": { "name": "type_id" } }
+              ]
+            }
+          },
+          { "sql": { "sql": "CREATE INDEX IF NOT EXISTS questions_spec_gin_idx ON questions USING GIN (spec jsonb_path_ops)" } },
+          { "sql": { "sql": "CREATE INDEX IF NOT EXISTS questions_solution_gin_idx ON questions USING GIN (solution jsonb_path_ops)" } },
+          { "sql": { "sql": "CREATE INDEX IF NOT EXISTS questions_tags_idx ON questions USING GIN (tags)" } },
+          { "sql": { "sql": "CREATE UNIQUE INDEX IF NOT EXISTS questions_seed_key_unique_idx ON questions(seed_key) WHERE seed_key IS NOT NULL" } }
+        ],
+        "rollback": [
+          { "sql": { "sql": "DROP INDEX IF EXISTS idx_questions_type_difficulty" } },
+          { "sql": { "sql": "DROP INDEX IF EXISTS idx_questions_fk_combo" } },
+          { "sql": { "sql": "DROP INDEX IF EXISTS questions_spec_gin_idx" } },
+          { "sql": { "sql": "DROP INDEX IF EXISTS questions_solution_gin_idx" } },
+          { "sql": { "sql": "DROP INDEX IF EXISTS questions_tags_idx" } },
+          { "sql": { "sql": "DROP INDEX IF EXISTS questions_seed_key_unique_idx" } }
+        ]
+      }
+    }
+  ]
+}

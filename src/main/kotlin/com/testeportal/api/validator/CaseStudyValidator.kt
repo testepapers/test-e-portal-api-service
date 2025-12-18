@@ -4,6 +4,7 @@ import com.testeportal.api.model.Question
 import com.testeportal.api.model.ValidationResult
 import com.testeportal.api.util.NormalizeUtil
 import org.springframework.stereotype.Component
+import jakarta.annotation.PostConstruct
 
 /**
  * Case Study Validator
@@ -11,8 +12,50 @@ import org.springframework.stereotype.Component
  */
 @Component
 class CaseStudyValidator(
-    private val validatorRegistry: ValidatorRegistry
+    private val mcqValidator: McqValidator,
+    private val matchValidator: MatchValidator,
+    private val fillBlanksValidator: FillBlanksValidator,
+    private val sequenceValidator: SequenceValidator,
+    private val subjectiveValidator: SubjectiveValidator
 ) : BaseValidator {
+    
+    private lateinit var validators: Map<String, BaseValidator>
+    private var selfReference: CaseStudyValidator? = null
+    
+    @PostConstruct
+    fun initialize() {
+        // Build validator map with all validators except self
+        // Self will be added via setSelfReference() after construction
+        validators = mapOf(
+            // MCQ types
+            "mcq" to mcqValidator,
+            "true_false" to mcqValidator,
+            "mcq_codes" to mcqValidator,
+            "assertion_reason" to mcqValidator,
+            
+            // Other types
+            "match" to matchValidator,
+            "fill_blanks" to fillBlanksValidator,
+            "sequence" to sequenceValidator,
+            "subjective" to subjectiveValidator,
+            "long_answer" to subjectiveValidator
+        )
+    }
+    
+    /**
+     * Set self reference to enable nested case study validation
+     * Called by ValidatorRegistry after both beans are constructed
+     */
+    fun setSelfReference(self: CaseStudyValidator) {
+        this.selfReference = self
+        // Add case_study to validators map now that we have self reference
+        validators = validators + ("case_study" to self)
+    }
+    
+    private fun getValidator(typeKey: String?): BaseValidator? {
+        val normalizedType = NormalizeUtil.normalizeQuestionType(typeKey)
+        return validators[normalizedType]
+    }
     
     override suspend fun validate(
         spec: Map<String, Any>,
@@ -53,7 +96,7 @@ class CaseStudyValidator(
             
             // Get appropriate validator for sub-question type
             val subQType = (subQ["type"] as? String) ?: continue
-            val validator = validatorRegistry.getValidator(subQType)
+            val validator = getValidator(subQType)
             if (validator == null) {
                 // Unknown sub-question type, skip
                 continue
